@@ -10,7 +10,6 @@ phases:
   build:
     commands:
       - terraform version
-      - echo "hello world" > sample.tfplan
 artifacts:
   files:
-    - "*.tfplan"
+    - environments/**/*
