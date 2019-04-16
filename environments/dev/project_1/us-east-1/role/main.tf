@@ -3,7 +3,7 @@ locals {
 }
 
 module "iam_role" {
-  source = "../../../modules/iam-simple"
+  source = "../../../../../modules/iam-simple"
 
   name_prefix = "${local.environment}-us-east-1"
 }
