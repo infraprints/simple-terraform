@@ -10,3 +10,4 @@ phases:
   build:
     commands:
       - terraform version
+      - bash .buildspec/apply.bash
