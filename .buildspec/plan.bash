@@ -11,7 +11,9 @@ init() {
     if [ -z ${TF_STATE_DYNAMO_TABLE+x} ]; then echo "env:TF_STATE_DYNAMO_TABLE is not yet. This is necessary for Terraform Pipelines."; exit 1; fi
     if [ -z ${TF_ENVIRONMENT+x} ]; then echo "env:TF_ENVIRONMENT is not yet. This is necessary for Terraform Pipelines."; exit 1; fi
 
-    key=$(realpath --relative-to="${DIR}" "$(pwd)")
+    curr=$(pwd)
+    echo "realpath --relative-to=${DIR} ${curr}"
+    key=$(realpath --relative-to="${DIR}" "${curr}")
 
     echo "" > "${FILE_BACKEND}"
     echo "region         = \"${TF_STATE_REGION}\""          >> "${FILE_BACKEND}"
