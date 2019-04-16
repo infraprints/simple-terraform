@@ -26,9 +26,6 @@ init() {
 main() {
     ## Init
     echo "[INFO]: Starting terraform pipeline"
-
-    ## Args
-    TF_ENVIRONMENT="$1"
     
     ## System
     DIR_ENV="${DIR}/environments"
