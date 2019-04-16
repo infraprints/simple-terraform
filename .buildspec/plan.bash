@@ -12,7 +12,7 @@ init() {
     if [ -z ${TF_ENVIRONMENT+x} ]; then echo "env:TF_ENVIRONMENT is not yet. This is necessary for Terraform Pipelines."; exit 1; fi
 
     curr=$(pwd)
-    key="${curr#"${DIR}"}"
+    key="${curr#"${DIR}/"}"
     echo "" > "${FILE_BACKEND}"
     echo "region         = \"${TF_STATE_REGION}\""          >> "${FILE_BACKEND}"
     echo "bucket         = \"${TF_STATE_BUCKET}\""          >> "${FILE_BACKEND}"
