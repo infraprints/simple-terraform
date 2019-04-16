@@ -1,6 +1,6 @@
 #!/bin/bash
 set -e
-DIR="$(dirname $( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd ))"
+# DIR="$(dirname $( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd ))"
 
 PLAN_NAME="infra.tfplan"
 FILE_BACKEND="backend.hcl"
@@ -10,7 +10,7 @@ main() {
     echo "[INFO]: Starting terraform pipeline"
     
     ## System
-    DIR_ENV="${DIR}/environments"
+    DIR_ENV="${CODEBUILD_SRC_DIR_plan}/environments"
     DIR_STAGE="${DIR_ENV}/${TF_ENVIRONMENT}"
 
     echo "[INFO]: Entering environment $TF_ENVIRONMENT"
