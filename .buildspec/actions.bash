@@ -1,37 +1,56 @@
 #!/bin/bash
 set -e
+DIR="$(dirname $( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd ))"
 
 PLAN_NAME="infra.tfplan"
+FILE_BACKEND="backend.hcl"
+
+init() {
+    if [ -z ${TF_STATE_REGION+x} ]; then echo "env:TF_STATE_REGION is not yet. This is necessary for Terraform Pipelines."; exit 1; fi
+    if [ -z ${TF_STATE_BUCKET+x} ]; then echo "env:TF_STATE_BUCKET is not yet. This is necessary for Terraform Pipelines."; exit 1; fi
+    if [ -z ${TF_STATE_DYNAMO_TABLE+x} ]; then echo "env:TF_STATE_DYNAMO_TABLE is not yet. This is necessary for Terraform Pipelines."; exit 1; fi
+    if [ -z ${TF_ENVIRONMENT+x} ]; then echo "env:TF_ENVIRONMENT is not yet. This is necessary for Terraform Pipelines."; exit 1; fi
+
+    key=$(realpath --relative-to="${DIR}" "$(pwd)")
+
+    echo "" > "${FILE_BACKEND}"
+    echo "region         = \"${TF_STATE_REGION}\""          >> "${FILE_BACKEND}"
+    echo "bucket         = \"${TF_STATE_BUCKET}\""          >> "${FILE_BACKEND}"
+    echo "dynamodb_table = \"${TF_STATE_DYNAMO_TABLE}\""    >> "${FILE_BACKEND}"
+    echo "key            = \"${key}/terraform.tfstate\""    >> "${FILE_BACKEND}"
+    echo "encrypt        = true"                            >> "${FILE_BACKEND}"
+
+    #terraform init -input=false -no-color -backend=true -backend-config="$FILE_BACKEND"
+}
 
 main() {
     ## Init
-    DIR="$(dirname $( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd ))"
     echo "[INFO]: Starting terraform pipeline"
 
     ## Args
-    stage="$1"
+    TF_ENVIRONMENT="$1"
     
     ## System
     DIR_ENV="${DIR}/environments"
-    DIR_STAGE="${DIR_ENV}/${stage}"
+    DIR_STAGE="${DIR_ENV}/${TF_ENVIRONMENT}"
 
-    echo "[INFO]: Entering environment $stage"
-    echo "[$stage]: Preparing to run"
+    echo "[INFO]: Entering environment $TF_ENVIRONMENT"
+    echo "[$TF_ENVIRONMENT]: Preparing to run"
     (
         cd "$DIR_STAGE"
-        for component in *; do
-            if [ ! -d "${component}" ]; then
-                continue
-            fi
-
-            DIR_COMPONENT="${DIR_STAGE}/${component}"
-            echo "[$stage]: Discovered component '${component}' at ${DIR_COMPONENT}"
+        find . -name "terraform.tf" | while read file_comp; do
+            echo $file_comp
+            component="$(basename "$(dirname "$file_comp")")"
+            namespace="$(dirname "$file_comp")"
+            namespace=${namespace#"./"}
+            scope="${TF_ENVIRONMENT}:${namespace}"
+            
+            echo "[$TF_ENVIRONMENT]: Discovered component '${component}' at ${namespace}"
             (
-                scope="${stage}:${component}"
-                cd "${component}"
-
+                cd "${namespace}"
                 echo "[$scope]: Initializing"
-                terraform init -input=false -no-color
+                init
+ 
                 echo "[$scope]: Emitting providers "
                 terraform providers -v
                 
@@ -41,5 +60,4 @@ main() {
     )
 }
 
-TF_ENVIRONMENT="dev"
-main "$TF_ENVIRONMENT"
+main
