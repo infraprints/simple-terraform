@@ -1,6 +1,6 @@
-#!/bin/bash
+#!/bin/sh
 set -e
-DIR="$(dirname $( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd ))"
+DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 
 PLAN_NAME="infra.tfplan"
 FILE_BACKEND="backend.hcl"
@@ -19,7 +19,7 @@ init() {
     echo "dynamodb_table = \"${TF_STATE_DYNAMO_TABLE}\""    >> "${FILE_BACKEND}"
     echo "key            = \"${key}/terraform.tfstate\""    >> "${FILE_BACKEND}"
     echo "encrypt        = true"                            >> "${FILE_BACKEND}"
-
+    cat ${FILE_BACKEND}
     #terraform init -input=false -no-color -backend=true -backend-config="$FILE_BACKEND"
 }
 
@@ -52,9 +52,9 @@ main() {
                 init
  
                 echo "[$scope]: Emitting providers "
-                terraform providers -v
+                #terraform providers -v
                 
-                terraform plan -input=false -no-color -out="$PLAN_NAME"
+                #terraform plan -input=false -no-color -out="$PLAN_NAME"
             )
         done
     )
