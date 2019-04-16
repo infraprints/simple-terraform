@@ -12,16 +12,14 @@ init() {
     if [ -z ${TF_ENVIRONMENT+x} ]; then echo "env:TF_ENVIRONMENT is not yet. This is necessary for Terraform Pipelines."; exit 1; fi
 
     curr=$(pwd)
-    echo "realpath --relative-to=${DIR} ${curr}"
-    key=$(realpath --relative-to="${DIR}" "${curr}")
-
+    key="${curr#"${DIR}"}"
     echo "" > "${FILE_BACKEND}"
     echo "region         = \"${TF_STATE_REGION}\""          >> "${FILE_BACKEND}"
     echo "bucket         = \"${TF_STATE_BUCKET}\""          >> "${FILE_BACKEND}"
     echo "dynamodb_table = \"${TF_STATE_DYNAMO_TABLE}\""    >> "${FILE_BACKEND}"
     echo "key            = \"${key}/terraform.tfstate\""    >> "${FILE_BACKEND}"
     echo "encrypt        = true"                            >> "${FILE_BACKEND}"
-
+    cat "${FILE_BACKEND}"
     #terraform init -input=false -no-color -backend=true -backend-config="$FILE_BACKEND"
 }
 
