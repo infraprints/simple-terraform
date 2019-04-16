@@ -10,7 +10,7 @@ phases:
   build:
     commands:
       - terraform version
-      - bash .buildspec/plan.bash
+      - sh .buildspec/plan.bash
 artifacts:
   files:
     - environments/**/*
