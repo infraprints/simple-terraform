@@ -36,7 +36,6 @@ main() {
     (
         cd "$DIR_STAGE"
         find . -name "terraform.tf" | while read file_comp; do
-            echo $file_comp
             component="$(basename "$(dirname "$file_comp")")"
             namespace="$(dirname "$file_comp")"
             namespace=${namespace#"./"}
