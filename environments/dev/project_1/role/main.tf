@@ -7,3 +7,7 @@ module "iam_role" {
 
   name_prefix = "${local.environment}-simple-iam"
 }
+
+output "value" {
+  value = "the"
+}
