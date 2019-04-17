@@ -4,6 +4,7 @@ set -e
 
 PLAN_NAME="infra.tfplan"
 FILE_BACKEND="backend.hcl"
+FILE_PLAN_SET="plans.log"
 
 main() {
     ## Init
@@ -17,13 +18,16 @@ main() {
     echo "[$TF_ENVIRONMENT]: Preparing to run"
     (
         cd "$DIR_STAGE"
-        find . -name "${PLAN_NAME}" | while read file_comp; do
-            component="$(basename "$(dirname "$file_comp")")"
-            namespace="$(dirname "$file_comp")"
+        find . -name "${PLAN_NAME}" -exec sh -c '(cd $(dirname {}) && export COUNTER=$(cat ORDER 2>/dev/null || echo 0) && echo ${COUNTER}%{})' \; > "${FILE_PLAN_SET}"
+        cat "${FILE_PLAN_SET}" | sort -n | while read file_comp; do
+            order="$(cut -d'%' -f1 <<< ${file_comp})"
+            component_path="$(cut -d'%' -f2 <<< ${file_comp})"
+            component="$(basename "$(dirname "$component_path")")"
+            namespace="$(dirname "$component_path")"
             namespace=${namespace#"./"}
-            scope="${TF_ENVIRONMENT}:${namespace}"
+            scope="${TF_ENVIRONMENT}:${order}:${namespace}"
             
-            echo "[$TF_ENVIRONMENT]: Discovered plan for '${component}' at ${namespace}"
+            echo "[${TF_ENVIRONMENT}:${order}]: Discovered plan for '${component}' at ${namespace}"
             (
                 cd "${namespace}"
  

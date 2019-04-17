@@ -3,7 +3,9 @@ set -e
 DIR="$(dirname $( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd ))"
 
 PLAN_NAME="infra.tfplan"
+TERRAFORM="terraform.tf"
 FILE_BACKEND="backend.hcl"
+FILE_EXEC_SET="tasks.log"
 
 init() {
     if [ -z ${TF_STATE_REGION+x} ]; then echo "env:TF_STATE_REGION is not yet. This is necessary for Terraform Pipelines."; exit 1; fi
@@ -35,13 +37,16 @@ main() {
     echo "[$TF_ENVIRONMENT]: Preparing to run"
     (
         cd "$DIR_STAGE"
-        find . -name "terraform.tf" | while read file_comp; do
-            component="$(basename "$(dirname "$file_comp")")"
-            namespace="$(dirname "$file_comp")"
-            namespace=${namespace#"./"}
-            scope="${TF_ENVIRONMENT}:${namespace}"
+        find . -name "${TERRAFORM}" -exec sh -c '(cd $(dirname {}) && export COUNTER=$(cat ORDER 2>/dev/null || echo 0) && echo ${COUNTER}%{})' \; > "${FILE_EXEC_SET}"
+        cat "${FILE_EXEC_SET}" | sort -n | while read file_comp; do
+            order="$(cut -d'%' -f1 <<< ${file_comp})"
+            component_path="$(cut -d'%' -f2 <<< ${file_comp})"
+            component="$(basename "$(dirname "$component_path")")"
+            namespace="$(dirname "$component_path")"
+            namespace="${namespace#"./"}"
+            scope="${TF_ENVIRONMENT}:${order}:${namespace}"
             
-            echo "[$TF_ENVIRONMENT]: Discovered component '${component}' at ${namespace}"
+            echo "[${TF_ENVIRONMENT}:${order}]: Discovered component '${component}' at ${namespace}"
             (
                 cd "${namespace}"
                 echo "[$scope]: Initializing"
