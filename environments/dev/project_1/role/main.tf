@@ -11,3 +11,7 @@ module "iam_role" {
 output "value" {
   value = "the"
 }
+
+output "sum" {
+  value = "the outcomes"
+}

@@ -9,5 +9,5 @@ module "iam_role" {
 }
 
 output "value" {
-  value = "${data.terraform_remote_state.top_level.value} for us-east-1"
+  value = "${data.terraform_remote_state.top_level.sum} for us-east-1"
 }
