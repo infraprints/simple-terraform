@@ -4,12 +4,13 @@ set -e
 
 PLAN_NAME="infra.tfplan"
 FILE_BACKEND="backend.hcl"
+FILE_NO_PLAN="NO_PLAN"
 FILE_PLAN_SET="plans.log"
 
 main() {
     ## Init
     echo "[INFO]: Starting terraform pipeline"
-    
+
     ## System
     DIR_ENV="${CODEBUILD_SRC_DIR_plan}/environments"
     DIR_STAGE="${DIR_ENV}/${TF_ENVIRONMENT}"
@@ -26,13 +27,18 @@ main() {
             namespace="$(dirname "$component_path")"
             namespace=${namespace#"./"}
             scope="${TF_ENVIRONMENT}:${order}:${namespace}"
-            
+
             echo "[${TF_ENVIRONMENT}:${order}]: Discovered plan for '${component}' at ${namespace}"
             (
                 cd "${namespace}"
- 
-                echo "[$scope]: Apply"                
-                terraform apply -auto-approve -input=false -no-color "$PLAN_NAME"
+
+                if [ -f "${FILE_NO_PLAN}" ]; then
+                    echo "[$scope]: Applying from scratch"
+                    terraform apply -auto-approve -input=false -no-color
+                else
+                    echo "[$scope]: Applying plan $PLAN_NAME"
+                    terraform apply -auto-approve -input=false -no-color "$PLAN_NAME"
+                fi
             )
         done
     )
