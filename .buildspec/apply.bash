@@ -6,6 +6,7 @@ PLAN_NAME="infra.tfplan"
 FILE_BACKEND="backend.hcl"
 FILE_NO_PLAN="NO_PLAN"
 FILE_PLAN_SET="plans.log"
+FILE_NO_RUN="IGNORE"
 
 main() {
     ## Init
@@ -31,6 +32,10 @@ main() {
             echo "[${TF_ENVIRONMENT}:${order}]: Discovered plan for '${component}' at ${namespace}"
             (
                 cd "${namespace}"
+                if [ -f "${FILE_NO_RUN}" ]; then
+                    echo "[$scope]: Ignore file detected. Ignoring."
+                    exit
+                fi
 
                 if [ -f "${FILE_NO_PLAN}" ]; then
                     echo "[$scope]: Applying from scratch"

@@ -6,6 +6,7 @@ PLAN_NAME="infra.tfplan"
 TERRAFORM="terraform.tf"
 FILE_BACKEND="backend.hcl"
 FILE_EXEC_SET="tasks.log"
+FILE_NO_RUN="IGNORE"
 
 init() {
     if [ -z ${TF_STATE_REGION+x} ]; then echo "env:TF_STATE_REGION is not yet. This is necessary for Terraform Pipelines."; exit 1; fi
@@ -49,6 +50,11 @@ main() {
             echo "[${TF_ENVIRONMENT}:${order}]: Discovered component '${component}' at ${namespace}"
             (
                 cd "${namespace}"
+                if [ -f "${FILE_NO_RUN}" ]; then
+                    echo "[$scope]: Ignore file detected. Ignoring."
+                    exit
+                fi
+                
                 echo "[$scope]: Initializing"
                 init
  
