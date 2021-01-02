@@ -1,0 +1,19 @@
+{
+  "slug": "simple-terraform",
+  "namespace": "jrbeverly",
+  "status": "archived",
+  "icon": "icon.svg",
+  "license": {
+    "type": "MIT",
+    "content": "Jonathan Beverly <jrbeverly>"
+  },
+  "topics": [
+    "terraform",
+    "terraform-pipelines",
+    "aws"
+  ],
+  "languages": [
+    "HCL",
+    "Shell"
+  ]
+}
