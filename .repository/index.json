@@ -13,6 +13,7 @@
     "aws"
   ],
   "languages": [
+    "Dockerfile",
     "HCL",
     "Shell"
   ]
